@@ -1748,6 +1748,14 @@ HKLM,"SYSTEM\CurrentControlSet\Services\kbdhid","ImagePath",0x00020000,"system32
 HKLM,"SYSTEM\CurrentControlSet\Services\kbdhid","Start",0x00010001,0x00000003
 HKLM,"SYSTEM\CurrentControlSet\Services\kbdhid","Type",0x00010001,0x00000001
 
+; Scott driver
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","ErrorControl",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","Group",0x00000000,"Extended base"
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","ImagePath",0x00020000,"system32\drivers\scott.sys"
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","Start",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","Type",0x00010001,0x00000001
+HKLM,"SYSTEM\CurrentControlSet\Services\scott","Tag",0x00010001,0x00000001
+
 ; HID mouse driver
 HKLM,"SYSTEM\CurrentControlSet\Services\mouhid","ErrorControl",0x00010001,0x00000001
 HKLM,"SYSTEM\CurrentControlSet\Services\mouhid","Group",0x00000000,"Pointer Port"

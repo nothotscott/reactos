@@ -11,8 +11,7 @@
 
 NTSTATUS
 NTAPI
-PdoCreate(IN PDEVICE_OBJECT DeviceObject,
-          IN PIRP Irp)
+PdoCreate(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     PPDO_DEVICE_EXTENSION DeviceExtension;
     PIO_STACK_LOCATION Stack;
@@ -41,11 +40,9 @@ done:
     return Status;
 }
 
-
 NTSTATUS
 NTAPI
-PdoClose(IN PDEVICE_OBJECT DeviceObject,
-         IN PIRP Irp)
+PdoClose(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     PPDO_DEVICE_EXTENSION pDeviceExtension;
 
@@ -61,11 +58,9 @@ PdoClose(IN PDEVICE_OBJECT DeviceObject,
     return STATUS_SUCCESS;
 }
 
-
 NTSTATUS
 NTAPI
-PdoCleanup(IN PDEVICE_OBJECT DeviceObject,
-           IN PIRP Irp)
+PdoCleanup(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     DPRINT("PdoCleanup()\n");
 
@@ -75,11 +70,9 @@ PdoCleanup(IN PDEVICE_OBJECT DeviceObject,
     return STATUS_SUCCESS;
 }
 
-
 NTSTATUS
 NTAPI
-PdoRead(IN PDEVICE_OBJECT DeviceObject,
-        IN PIRP Irp)
+PdoRead(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     DPRINT("PdoRead()\n");
 
@@ -89,11 +82,9 @@ PdoRead(IN PDEVICE_OBJECT DeviceObject,
     return STATUS_SUCCESS;
 }
 
-
 NTSTATUS
 NTAPI
-PdoWrite(IN PDEVICE_OBJECT DeviceObject,
-         IN PIRP Irp)
+PdoWrite(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     PPDO_DEVICE_EXTENSION PdoDeviceExtension;
     PFDO_DEVICE_EXTENSION FdoDeviceExtension;
@@ -123,8 +114,7 @@ PdoWrite(IN PDEVICE_OBJECT DeviceObject,
             KeStallExecutionProcessor(10);
             PortStatus = READ_PORT_UCHAR(UlongToPtr(FdoDeviceExtension->BaseAddress + 1));
             ulCount++;
-        }
-        while (ulCount < 500000 && !(PortStatus & LP_PBUSY));
+        } while (ulCount < 500000 && !(PortStatus & LP_PBUSY));
 
         if (ulCount == 500000)
         {
@@ -155,11 +145,9 @@ PdoWrite(IN PDEVICE_OBJECT DeviceObject,
     return STATUS_SUCCESS;
 }
 
-
 NTSTATUS
 NTAPI
-PdoPnp(IN PDEVICE_OBJECT DeviceObject,
-       IN PIRP Irp)
+PdoPnp(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     NTSTATUS Status;
     DPRINT("PdoPnp()\n");
@@ -169,11 +157,9 @@ PdoPnp(IN PDEVICE_OBJECT DeviceObject,
     return Status;
 }
 
-
 NTSTATUS
 NTAPI
-PdoPower(IN PDEVICE_OBJECT DeviceObject,
-         IN PIRP Irp)
+PdoPower(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
 {
     NTSTATUS Status;
     PIO_STACK_LOCATION IoStack;
