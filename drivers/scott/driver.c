@@ -1,7 +1,8 @@
 /*
- * COPYRIGHT:       See COPYING in the top level directory
- * PROJECT:         Scott's Test Driver
- * PURPOSE:         Scott's driver loading/unloading
+ * PROJECT:     ReactOS Scott Driver
+ * LICENSE:     GPL-2.0-or-later (https://spdx.org/licenses/GPL-2.0-or-later)
+ * PURPOSE:     Scott's test driver
+ * COPYRIGHT:   Copyright 2021 Scott Maday <coldasdryice1@gmail.com>
  */
 
 #include "driver.h"
@@ -16,75 +17,172 @@ DRIVER_INITIALIZE DriverEntry;
 
 /* FUNCTIONS ****************************************************************/
 
-static VOID NTAPI
+static
+VOID
+NTAPI
 DriverUnload(IN PDRIVER_OBJECT DriverObject)
 {
+    UNICODE_STRING DosDeviceName, GlobalDeviceName;
+
     DPRINT("Scott's DriverUnload\n");
-    return STATUS_SUCCESS;
+
+    RtlInitUnicodeString(&DosDeviceName, L"\\DosDevices\\scott");
+    RtlInitUnicodeString(&GlobalDeviceName, L"\\??\\scott");
+
+    IoDeleteSymbolicLink(&DosDeviceName);
+    IoDeleteSymbolicLink(&GlobalDeviceName);
+
+    IoDeleteDevice(DriverObject->DeviceObject);
 }
 
-static NTSTATUS NTAPI
-DispatchCreate(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchCreate(IN PDEVICE_OBJECT DeviceObject,
+               IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_NOT_IMPLEMENTED;
     DPRINT("Scott's DispatchCreate\n");
-    return STATUS_NOT_IMPLEMENTED;
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchClose(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchClose(IN PDEVICE_OBJECT DeviceObject,
+              IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_NOT_IMPLEMENTED;
     DPRINT("Scott's DispatchClose\n");
-    return STATUS_NOT_IMPLEMENTED;
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchCleanup(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchCleanup(IN PDEVICE_OBJECT DeviceObject,
+                IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_NOT_IMPLEMENTED;
     DPRINT("Scott's DispatchCleanup\n");
-    return STATUS_NOT_IMPLEMENTED;
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchRead(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchRead(IN PDEVICE_OBJECT DeviceObject, 
+             IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_SUCCESS;
+    PIO_STACK_LOCATION IoStack = NULL;
+    PUCHAR Buffer;
+
     DPRINT("Scott's DispatchRead\n");
-    return STATUS_NOT_IMPLEMENTED;
+
+    IoStack = IoGetCurrentIrpStackLocation(Irp);
+    if (!IoStack)
+    {
+        return STATUS_BAD_STACK;
+    }
+
+    __try
+    {
+        ProbeForRead(Irp->UserBuffer, IoStack->Parameters.Read.Length, TYPE_ALIGNMENT(char));
+        Buffer = Irp->UserBuffer;
+        DPRINT("Read buffer (%p): %s\n", Buffer, Buffer);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        NtStatus = GetExceptionCode();
+    }
+    if (!Buffer)
+    {
+        return STATUS_INVALID_BUFFER_SIZE;
+    }
+
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchWrite(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchWrite(IN PDEVICE_OBJECT DeviceObject,
+              IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_SUCCESS;
+    PIO_STACK_LOCATION IoStack = NULL;
+    PUCHAR Buffer;
+
     DPRINT("Scott's DispatchWrite\n");
-    return STATUS_NOT_IMPLEMENTED;
+
+    IoStack = IoGetCurrentIrpStackLocation(Irp);
+    if (!IoStack)
+    {
+        return STATUS_BAD_STACK;
+    }
+    
+    __try {
+        ProbeForRead(Irp->UserBuffer, IoStack->Parameters.Write.Length, TYPE_ALIGNMENT(char));
+        Buffer = Irp->UserBuffer;
+        DPRINT("Write buffer (%p): %s\n", Buffer, Buffer);
+    }
+    __except (EXCEPTION_EXECUTE_HANDLER)
+    {
+        NtStatus = GetExceptionCode();
+    }
+    if (!Buffer)
+    {
+        return STATUS_INVALID_BUFFER_SIZE;
+    }
+
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchPnp(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchPnp(IN PDEVICE_OBJECT DeviceObject,
+            IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_NOT_IMPLEMENTED;
     DPRINT("Scott's DispatchPnp\n");
-    return STATUS_NOT_IMPLEMENTED;
+    return NtStatus;
 }
 
-static NTSTATUS NTAPI
-DispatchPower(IN PDEVICE_OBJECT DeviceObject, IN PIRP Irp)
+static
+NTSTATUS
+NTAPI
+DispatchPower(IN PDEVICE_OBJECT DeviceObject,
+              IN PIRP Irp)
 {
+    NTSTATUS NtStatus = STATUS_NOT_IMPLEMENTED;
     DPRINT("Scott's DispatchPower\n");
-    return STATUS_NOT_IMPLEMENTED;
+    return NtStatus;
 }
 
-NTSTATUS NTAPI
-DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegPath)
+NTSTATUS
+NTAPI
+DriverEntry(IN PDRIVER_OBJECT DriverObject,
+            IN PUNICODE_STRING RegPath)
 {
-    NTSTATUS status = STATUS_SUCCESS;
-    UNICODE_STRING usDriverName, usDosDeviceName;
+    NTSTATUS NtStatus = STATUS_SUCCESS;
+    UNICODE_STRING DeviceName, DosDeviceName, GlobalDeviceName;
     PDEVICE_OBJECT DeviceObject;
 
     DPRINT("Scott's driver entry\n");
 
-    RtlInitUnicodeString(&usDriverName, L"\\Device\\Scott");
-    RtlInitUnicodeString(&usDosDeviceName, L"\\DosDevices\\Scott");
-    status = IoCreateDevice(
-        DriverObject, 0, &usDriverName, FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN, FALSE, &DeviceObject);
+    RtlInitUnicodeString(&DeviceName, L"\\Device\\scott");
+    RtlInitUnicodeString(&DosDeviceName, L"\\DosDevice\\scott");
+    RtlInitUnicodeString(&GlobalDeviceName, L"\\??\\scott");
+
+    NtStatus = IoCreateDevice(DriverObject,
+                              0,
+                              &DeviceName,
+                              FILE_DEVICE_UNKNOWN,
+                              FILE_DEVICE_SECURE_OPEN,
+                              FALSE,
+                              &DeviceObject);
 
     DriverObject->MajorFunction[IRP_MJ_CREATE] = DispatchCreate;
     DriverObject->MajorFunction[IRP_MJ_CLOSE] = DispatchClose;
@@ -93,6 +191,12 @@ DriverEntry(IN PDRIVER_OBJECT DriverObject, IN PUNICODE_STRING RegPath)
     DriverObject->MajorFunction[IRP_MJ_WRITE] = DispatchWrite;
     DriverObject->MajorFunction[IRP_MJ_PNP] = DispatchPnp;
     DriverObject->MajorFunction[IRP_MJ_POWER] = DispatchPower;
+    DriverObject->DriverUnload = DriverUnload;
 
-    return status;
+    DeviceObject->Flags &= (~DO_DEVICE_INITIALIZING);
+
+    IoCreateSymbolicLink(&DosDeviceName, &DeviceName);
+    IoCreateSymbolicLink(&GlobalDeviceName, &DeviceName);
+
+    return NtStatus;
 }

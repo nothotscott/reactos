@@ -23,5 +23,4 @@ add_subdirectory(storage)
 add_subdirectory(usb)
 add_subdirectory(wdm)
 add_subdirectory(wmi)
-
 add_subdirectory(scott)
