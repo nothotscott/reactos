@@ -1,6 +1,7 @@
 
 list(APPEND SOURCE
-    driver.c)
+    driver.c
+    io.c)
 
 add_library(scott MODULE
     ${SOURCE}

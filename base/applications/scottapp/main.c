@@ -7,17 +7,42 @@
 
 #include <stdio.h>
 #include <windows.h>
+
 #include <debug.h>
 
 #define CRITICAL_ERROR (-1)
 
+#define IOCTL_MODE_DIRECT_IN  CTL_CODE(FILE_DEVICE_UNKNOWN,             \
+                                       0x800,                           \
+                                       METHOD_IN_DIRECT,                \
+                                       FILE_READ_DATA | FILE_WRITE_DATA)
+
+#define IOCTL_MODE_DIRECT_OUT CTL_CODE(FILE_DEVICE_UNKNOWN,             \
+                                       0x801,                           \
+                                       METHOD_OUT_DIRECT,               \
+                                       FILE_READ_DATA | FILE_WRITE_DATA)
+
+#define IOCTL_MODE_BUFFERED   CTL_CODE(FILE_DEVICE_UNKNOWN,             \
+                                       0x802,                           \
+                                       METHOD_BUFFERED,                 \
+                                       FILE_READ_DATA | FILE_WRITE_DATA)
+
+#define IOCTL_MODE_NEITHER    CTL_CODE(FILE_DEVICE_UNKNOWN,             \
+                                       0x803,                           \
+                                       METHOD_NEITHER,                  \
+                                       FILE_READ_DATA | FILE_WRITE_DATA)
+
 static
 BOOL
-SendDeviceMessage(PCHAR Msg)
+SendDeviceMessage(IN PCHAR InputMsg,
+                  IN DWORD nInputMsgSize,
+                  OUT PCHAR OutputMsg,
+                  IN DWORD nOutputMsgSize)
 {
     HANDLE hFile;
     DWORD dwReturn;
-    BOOL Status = TRUE;
+    BOOL Status;
+    
 
     OutputDebugString("Creating scott device file\n");
 
@@ -34,14 +59,23 @@ SendDeviceMessage(PCHAR Msg)
         return FALSE;
     }
 
-    Status &= WriteFile(hFile, Msg, sizeof(Msg), &dwReturn, NULL);
-    if (!Status)
-    {
-        OutputDebugString("Failed to write to device file\n");
-    }
-    Status &= CloseHandle(hFile);
+    RtlZeroMemory(OutputMsg, nOutputMsgSize);
 
-    return Status;
+    Status = DeviceIoControl(hFile,
+                             IOCTL_MODE_NEITHER,
+                             InputMsg,
+                             nInputMsgSize,
+                             OutputMsg,
+                             nOutputMsgSize,
+                             &dwReturn,
+                             NULL);
+    if(Status != TRUE)
+    {
+        OutputDebugString("Could not send & receive device IO\n");
+        return Status;
+    }
+
+    return CloseHandle(hFile);
 }
 
 INT
@@ -97,7 +131,7 @@ main(VOID)
 
     while(TRUE)
     {
-        printf("q=Quit, s=Stop, m=Message\n");
+        printf("q=Quit, s=Start,x=Stop, m=Message\n");
         switch (getchar())
         {
             case 'q':
@@ -105,10 +139,21 @@ main(VOID)
                 goto Cleanup;
             case 's':
             {
+                if (StartService(hService, 0, NULL))
+                {
+                    printf("Successfully started scott service\n");
+                }
+                else
+                {
+                    printf("Failed to start scott service\n");
+                }
+                break;
+            }
+            case 'x':
+            {
                 if (ControlService(hService, SERVICE_CONTROL_STOP, &ServiceStatus))
                 {
                     printf("Successfully stopped scott service\n");
-                    goto Cleanup;
                 }
                 else
                 {
@@ -118,15 +163,16 @@ main(VOID)
             }
             case 'm':
             {
-                CHAR Msg[128];
+                CHAR InMsg[128];
+                CHAR OutMsg[128];
 
                 fflush(stdin);
                 printf("Message: ");
-                fgets(Msg, sizeof(Msg) - 1, stdin);
+                fgets(InMsg, sizeof(InMsg) - 1, stdin);
 
-                if (SendDeviceMessage(Msg))
+                if (SendDeviceMessage(InMsg, strlen(InMsg), OutMsg, sizeof(OutMsg)))
                 {
-                    printf("Message sent\n");
+                    printf("Return: %s\n", OutMsg);
                 }
                 else
                 {
