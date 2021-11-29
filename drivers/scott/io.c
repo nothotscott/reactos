@@ -39,14 +39,7 @@ GetIoReadBuffer(IN PIRP Irp,
             {
                 break;
             }
-            __try
-            {
-                ProbeForRead(*pInputBuffer, *lpInputBufferLength, TYPE_ALIGNMENT(char));
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return GetExceptionCode();
-            }
+            ProbeForRead(*pInputBuffer, *lpInputBufferLength, TYPE_ALIGNMENT(char));
             break;
         default:
             return STATUS_UNSUCCESSFUL;
@@ -87,14 +80,7 @@ GetIoWriteBuffer(IN PIRP Irp,
             {
                 break;
             }
-            __try
-            {
-                ProbeForWrite(*pOutputBuffer, *lpOutputBufferLength, TYPE_ALIGNMENT(char));
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return GetExceptionCode();
-            }
+            ProbeForWrite(*pOutputBuffer, *lpOutputBufferLength, TYPE_ALIGNMENT(char));
             break;
         default:
             return STATUS_UNSUCCESSFUL;
@@ -151,7 +137,7 @@ HandleIoWrite(IN PIRP Irp,
     }
 
     RtlCopyMemory(OutputBuffer, InputBuffer, InputBufferLength);
-    RtlInitString(&OutputString, OutputBuffer);
+    RtlInitString(&OutputString, (PCSZ)OutputBuffer);
     RtlUpperString(&OutputString, &OutputString);
     
     return Status;
